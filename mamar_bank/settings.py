@@ -33,6 +33,8 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = ['https://github.com/MerinaMou110/Mamar_bank_project/tree/main','https://*.127.0.0.1'] # first part will be your deploy project’s domain name
+
 
 
 # Application definition
