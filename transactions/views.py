@@ -31,6 +31,16 @@ def send_transection_email(user, amount, subject, template):
         send_email.attach_alternative(message, "text/html")
         send_email.send()
 
+def send_transfer_transection_email(user,receiver, amount, subject, template):
+        message = render_to_string(template, {
+            'user' : user,
+            'receiver' : receiver,
+            'amount' : amount,
+        })
+        send_email = EmailMultiAlternatives(subject, '', to=[user.email])
+        send_email.attach_alternative(message, "text/html")
+        send_email.send()
+
 
 
 
@@ -269,6 +279,9 @@ class TransferMoneyView(TransactionCreateMixin):
             self.request,
             f'Successfully transferred {"{:,.2f}".format(float(amount))}$ to {recipient_account.user.username}'
         )
+        # Send email notification to both sender and recipient
+        send_transfer_transection_email(self.request.user,recipient_account.user, amount, "Transfer Message", "transactions/transfer_email.html")
+        send_transfer_transection_email(recipient_account.user,self.request.user, amount, "Transfer Message", "transactions/transfer_receiver_email.html")
 
         return super().form_valid(form)
    

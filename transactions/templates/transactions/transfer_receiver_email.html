@@ -1,0 +1,10 @@
+<h2>Transfer Notification</h2>
+    <p>Hello {{ user.username }},</p>
+    <p>You have received a transfer of  ${{amount}} from {{ receiver.username }}. After Recxeive your total amount is {{user.account.balance}}</p>
+    <p>Transaction Details:</p>
+    <ul>
+        <li>Amount:  ${{amount}}</li>
+        <li>Sender: {{ receiver.username }}</li>
+        <!-- Add more transaction details as needed -->
+    </ul>
+    <p>Thank you for using our banking services.</p>

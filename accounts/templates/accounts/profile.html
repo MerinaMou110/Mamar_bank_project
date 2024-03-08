@@ -3,15 +3,15 @@
     <p class="font-bold">Error!</p>
     <p class="block sm:inline">{{ error }}</p>
 </div>
-{% endfor %} {% endif %} {% if form.non_field_errors %} {% for error in form.non_field_errors %}
-<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-2" role="alert">
-    <p class="font-bold">Error!</p>
-    <p class="block sm:inline">{{ error }}</p>
-</div>
-{% endfor %} {% endif %}
+{% endfor %} {% endif %} 
 <div class="bg-white px-3 py-4 rounded-xl my-6">
-
+    
     <h4 class="font-bold text-3xl text-left pb-5">Account NO: {{request.user.account.account_no}}</h4>
+    <form action="{% url 'password_change' %}" method="post">
+        {% csrf_token %}
+        <!-- Your form fields go here, e.g., current password, new password, etc. -->
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">Change Password</button>
+    </form>
     <h1 class="font-bold text-3xl text-center pb-5">Update Profile Information</h1>
     <div class="w-full mt-10">
         <form method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">

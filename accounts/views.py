@@ -1,6 +1,6 @@
 from django.shortcuts import  HttpResponseRedirect,render
 from django.views.generic import FormView
-from .forms import UserRegistrationForm,UserUpdateForm
+from .forms import UserRegistrationForm,UserUpdateForm,CustomPasswordChangeForm
 #django amaderk login korar subidha dey
 from django.contrib.auth import login,logout
 
@@ -9,8 +9,21 @@ from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView, LogoutView
 from django.views import View
 from django.shortcuts import redirect
-
+from django.core.mail import EmailMessage,EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.contrib.auth.views import PasswordChangeView
+from django.contrib import messages
 # Create your views here.
+
+def send_email_user(user,  subject, template):
+        message = render_to_string(template, {
+            'user' : user,
+            
+        })
+        send_email = EmailMultiAlternatives(subject, '', to=[user.email])
+        send_email.attach_alternative(message, "text/html")
+        send_email.send()
+
 class UserRegistrationView(FormView):
     template_name = 'accounts/user_registration.html'
     form_class = UserRegistrationForm
@@ -53,3 +66,22 @@ class UserBankAccountUpdateView(View):
         return render(request, self.template_name, {'form': form})
     
     
+
+
+
+
+class CustomPasswordChangeView(PasswordChangeView):
+    form_class = CustomPasswordChangeForm
+    template_name = 'accounts/password_change.html'
+    success_url = reverse_lazy('profile')  # Update with the URL name of your profile page
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user = self.request.user
+
+        # Send email notification about the password change
+        
+        send_email_user(self.request.user,  "Password Change Notification", "accounts/update_email.html")
+
+        messages.success(self.request, 'Your password has been changed successfully.')
+        return response
