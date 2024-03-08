@@ -1,11 +1,13 @@
 from django import forms 
 from .models import Transaction
+from accounts.models import UserBankAccount
 class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
         fields = [
             'amount',
-            'transaction_type'
+            'transaction_type',
+            'recipient_account',
         ]
 
 # transaction er kj hobe backend theke. user transaction choice jate nh korte pare
@@ -74,3 +76,18 @@ class LoanRequestForm(TransactionForm):
         amount = self.cleaned_data.get('amount')
 
         return amount
+    
+
+
+class TransferForm(TransactionForm):
+    recipient_account_number = forms.CharField(label='Recipient Account Number', max_length=20)
+
+  
+    def clean_recipient_account_number(self):
+        recipient_account_number = self.cleaned_data.get('recipient_account_number')
+        try:
+            recipient_account =UserBankAccount.objects.get(account_no=recipient_account_number)
+            return recipient_account.account_no
+        except UserBankAccount.DoesNotExist:
+            raise forms.ValidationError('Recipient account not found.')
+            

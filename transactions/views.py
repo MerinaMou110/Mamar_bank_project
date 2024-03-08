@@ -6,17 +6,19 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views import View
 from django.http import HttpResponse
 from django.views.generic import CreateView, ListView
-from transactions.constants import DEPOSIT, WITHDRAWAL,LOAN, LOAN_PAID
+from transactions.constants import DEPOSIT, WITHDRAWAL,LOAN, LOAN_PAID,TRANSFER
 from django.core.mail import EmailMessage,EmailMultiAlternatives
 from django.template.loader import render_to_string
 from datetime import datetime
 from django.db.models import Sum
+from accounts.models import UserBankAccount
 
 # Create your views here.
 from transactions.forms import (
     DepositForm,
     WithdrawForm,
     LoanRequestForm,
+    TransferForm
 )
 from transactions.models import Transaction
 
@@ -102,6 +104,15 @@ class WithdrawMoneyView(TransactionCreateMixin):
 
     def form_valid(self, form):
         amount = form.cleaned_data.get('amount')
+        
+        if Transaction.objects.filter(bank_rupt=True).exists():
+            messages.error(
+                self.request,
+                'The bank is bankrupt. Withdrawals are not allowed at the moment.'
+            )
+            return redirect('withdraw_money')
+        
+
 
         self.request.user.account.balance -= form.cleaned_data.get('amount')
         # balance = 300
@@ -220,3 +231,44 @@ class LoanListView(LoginRequiredMixin,ListView):
         print(queryset)
         return queryset
     
+
+
+
+
+class TransferMoneyView(TransactionCreateMixin):
+    
+    form_class = TransferForm
+    title = 'Transfer Money'
+
+    def get_initial(self):
+        initial = {'transaction_type': TRANSFER}
+        return initial
+    print(f"Recipient Account (form_valid): ")
+    def form_valid(self, form):
+        
+        recipient_account = form.cleaned_data.get('recipient_account_number')
+        print(f"Recipient Account (form_valid): {recipient_account}")
+        amount = form.cleaned_data.get('amount')
+
+        # Check if the recipient account exists
+        if not recipient_account:
+            messages.error(self.request, 'Recipient account not found.')
+            # return redirect('transfer_money')
+        
+        sender_account = self.request.user.account
+        recipient_account = UserBankAccount.objects.get(account_no=recipient_account)  # Fetch the actual UserBankAccount instance
+        
+        recipient_account.balance += amount
+        sender_account.balance -= amount
+        
+
+        recipient_account.save()
+        sender_account.save()
+
+        messages.success(
+            self.request,
+            f'Successfully transferred {"{:,.2f}".format(float(amount))}$ to {recipient_account.user.username}'
+        )
+
+        return super().form_valid(form)
+   
