@@ -156,7 +156,7 @@ class LoanRequestView(TransactionCreateMixin):
             return HttpResponse("You have cross the loan limits")
         messages.success(
             self.request,
-            f'Loan request for {"{:,.2f}".format(float(amount))}$ submitted successfully'
+            f'Lo an request for {"{:,.2f}".format(float(amount))}$ submitted successfully'
         )
         send_transection_email(self.request.user, amount, "Loan Request Message", "transactions/loan_email.html")
 

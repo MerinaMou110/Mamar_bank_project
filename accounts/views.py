@@ -41,6 +41,10 @@ class UserRegistrationView(FormView):
 class UserLoginView(LoginView):
     template_name = 'accounts/user_login.html'
     def get_success_url(self):
+        messages.success(
+            self.request,
+            f'Your Account Logged in successfully'
+        )
         return reverse_lazy('home')
 
 class UserLogoutView(LogoutView):
